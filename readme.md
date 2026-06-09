@@ -19,6 +19,7 @@ A production-ready, cross-platform Python automation system that monitors and cl
 - **Safe Execution:** Skips active directories to preserve existing folder structures.
 - **Dry Run Mode:** Preview every move before it happens. The script defaults to a safe test mode that prints what *would* happen without touching any files.
 - **Date-Based Subfolders:** Files are automatically sorted into `Year/Month` subfolders within each category (e.g., `/Images/2026/June/`), keeping things tidy long-term.
+- **Automatic Duplicate Cleanup:** Uses MD5 hashing to detect files with identical content. Exact duplicates are deleted instead of being moved, saving disk space.
 - **Reversible:** Accidentally ran it? Run the companion `undo_cleaner.py` script to seamlessly return all files to the main folder and delete the generated subfolders.
 
 ---
@@ -103,14 +104,23 @@ Downloads/
 
 This prevents individual category folders from becoming cluttered over time.
 
-### 3. Change the Folder Path
+### 3. Automatic Duplicate Cleanup
+Before moving a file, the script calculates its MD5 hash (a digital fingerprint of the file's contents) and compares it against every file already in the destination folder. If an exact match is found — even if the filenames differ — the duplicate is deleted instead of moved.
+
+```
+🗑️  Deleted duplicate: installer_copy.exe (matches installer.exe)
+```
+
+This runs automatically and respects **Dry Run** mode, so you can preview which duplicates would be removed before anything is deleted.
+
+### 4. Change the Folder Path
 By default, the script scans your default system Downloads folder using `Path.home() / "Downloads"`. If you want to clean your Desktop instead, open `cleaner.py` and `undo_cleaner.py` in a text editor and change that line to:
 
 ```python
 DOWNLOADS_DIR = Path.home() / "Desktop"
 ```
 
-### 4. Run Automatically on a Schedule
+### 5. Run Automatically on a Schedule
 
 **Windows (Task Scheduler)**
 

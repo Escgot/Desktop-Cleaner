@@ -1,5 +1,6 @@
 import os
 import shutil
+import hashlib
 from pathlib import Path
 from datetime import datetime
 
@@ -19,6 +20,13 @@ FILE_CATEGORIES = {
     "Audio_Video": [".mp3", ".wav", ".mp4", ".mov", ".mkv", ".avi", ".flac"]
 }
 
+def file_hash(file_path):
+    hasher = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
 def clean_downloads():
     if not DOWNLOADS_DIR.exists():
         print(f"❌ Error: Could not find the folder at {DOWNLOADS_DIR}")
@@ -27,6 +35,7 @@ def clean_downloads():
     mode = "DRY RUN" if DRY_RUN else "LIVE"
     print(f"🧹 [{mode}] Scanning and organizing: {DOWNLOADS_DIR}\n")
     files_moved = 0
+    dupes_removed = 0
 
     # Iterate through every item in the Downloads folder
     for item in DOWNLOADS_DIR.iterdir():
@@ -52,15 +61,33 @@ def clean_downloads():
                 
                 destination = target_dir / item.name
                 
+                # Check for exact duplicate by MD5 hash
+                item_hash = file_hash(item)
+                is_duplicate = False
+                for existing in target_dir.iterdir():
+                    if existing.is_file() and file_hash(existing) == item_hash:
+                        is_duplicate = True
+                        if DRY_RUN:
+                            print(f"[DRY RUN] Would delete duplicate: {item.name} (matches {existing.name})")
+                        else:
+                            item.unlink()
+                            print(f"🗑️  Deleted duplicate: {item.name} (matches {existing.name})")
+                        dupes_removed += 1
+                        break
+
+                if is_duplicate:
+                    moved = True
+                    break
+
                 # Prevent overwriting if a file with the same name already exists
                 if destination.exists():
                     destination = target_dir / f"{item.stem}_copy{file_ext}"
 
                 if DRY_RUN:
-                    print(f"[DRY RUN] Would move: {item.name} ➡️ /{category}")
+                    print(f"[DRY RUN] Would move: {item.name} ➡️ /{category}/{year_month}")
                 else:
                     shutil.move(str(item), str(destination))
-                    print(f"📁 Moved: {item.name} ➡️ /{category}")
+                    print(f"📁 Moved: {item.name} ➡️ /{category}/{year_month}")
                 files_moved += 1
                 moved = True
                 break
@@ -84,7 +111,7 @@ def clean_downloads():
                     print(f"📁 Moved unknown file: {item.name} ➡️ /Others")
                 files_moved += 1
 
-    print(f"\n✨ Clean-up complete! Organized {files_moved} files.")
+    print(f"\n✨ Clean-up complete! Organized {files_moved} files, removed {dupes_removed} duplicates.")
 
 if __name__ == "__main__":
     clean_downloads()
