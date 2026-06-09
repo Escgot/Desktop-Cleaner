@@ -17,6 +17,8 @@ A production-ready, cross-platform Python automation system that monitors and cl
   - `/Audio_Video` (mp3, mp4, mkv...)
   - `/Others` (Catch-all folder for unspecified types)
 - **Safe Execution:** Skips active directories to preserve existing folder structures.
+- **Dry Run Mode:** Preview every move before it happens. The script defaults to a safe test mode that prints what *would* happen without touching any files.
+- **Date-Based Subfolders:** Files are automatically sorted into `Year/Month` subfolders within each category (e.g., `/Images/2026/June/`), keeping things tidy long-term.
 - **Reversible:** Accidentally ran it? Run the companion `undo_cleaner.py` script to seamlessly return all files to the main folder and delete the generated subfolders.
 
 ---
@@ -64,14 +66,51 @@ python3 undo_cleaner.py
 
 ## 🛠️ Advanced Customization & Autopilot
 
-### 1. Change the Folder Path
+### 1. Dry Run Mode
+By default, `DRY_RUN` is set to `True` at the top of `cleaner.py`. In this mode the script will only **print** what it would do:
+
+```
+🧹 [DRY RUN] Scanning and organizing: /Users/you/Downloads
+
+[DRY RUN] Would move: photo.png ➡️ /Images/2026/June
+[DRY RUN] Would move: report.pdf ➡️ /PDFs/2026/June
+```
+
+Once you're happy with the preview, open `cleaner.py` and flip the flag:
+
+```python
+DRY_RUN = False  # Now files will actually be moved
+```
+
+### 2. Date-Based Subfolders
+Files are automatically organized into `Year/Month` subfolders based on their last-modified date. For example:
+
+```
+Downloads/
+├── Images/
+│   └── 2026/
+│       └── June/
+│           └── photo.png
+├── Documents/
+│   └── 2025/
+│       └── December/
+│           └── report.docx
+└── Others/
+    └── 2026/
+        └── June/
+            └── random.dat
+```
+
+This prevents individual category folders from becoming cluttered over time.
+
+### 3. Change the Folder Path
 By default, the script scans your default system Downloads folder using `Path.home() / "Downloads"`. If you want to clean your Desktop instead, open `cleaner.py` and `undo_cleaner.py` in a text editor and change that line to:
 
 ```python
 DOWNLOADS_DIR = Path.home() / "Desktop"
 ```
 
-### 2. Run Automatically on a Schedule
+### 4. Run Automatically on a Schedule
 
 **Windows (Task Scheduler)**
 
