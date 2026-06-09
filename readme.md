@@ -20,6 +20,7 @@ A production-ready, cross-platform Python automation system that monitors and cl
 - **Dry Run Mode:** Preview every move before it happens. The script defaults to a safe test mode that prints what *would* happen without touching any files.
 - **Date-Based Subfolders:** Files are automatically sorted into `Year/Month` subfolders within each category (e.g., `/Images/2026/June/`), keeping things tidy long-term.
 - **Automatic Duplicate Cleanup:** Uses MD5 hashing to detect files with identical content. Exact duplicates are deleted instead of being moved, saving disk space.
+- **Real-Time Watcher:** Uses the `watchdog` library to monitor your folder in real time. The instant a new file lands, it is sorted automatically — no schedules or manual runs needed.
 - **Reversible:** Accidentally ran it? Run the companion `undo_cleaner.py` script to seamlessly return all files to the main folder and delete the generated subfolders.
 
 ---
@@ -31,9 +32,10 @@ Ensure Python 3.x is installed on your computer.
 * **Windows Users:** Ensure you check the box that says **"Add python.exe to PATH"** during installation.
 
 ### Step 2: Download the Scripts
-Save both scripts into a folder on your system (e.g., `C:\Users\YourName\Scripts\` or `~/Scripts/`):
-1. **`cleaner.py`** — The primary sorting script.
-2. **`undo_cleaner.py`** — The emergency reversal script.
+Save all scripts into a folder on your system (e.g., `C:\Users\YourName\Scripts\` or `~/Scripts/`):
+1. **`cleaner.py`** — The primary sorting script (one-time batch run).
+2. **`watcher.py`** — Real-time monitor that sorts files the instant they appear.
+3. **`undo_cleaner.py`** — The emergency reversal script.
 
 ### Step 3: Run the Script Manually
 Open your terminal (macOS/Linux) or Command Prompt (Windows), navigate to your scripts directory, and execute:
@@ -120,7 +122,30 @@ By default, the script scans your default system Downloads folder using `Path.ho
 DOWNLOADS_DIR = Path.home() / "Desktop"
 ```
 
-### 5. Run Automatically on a Schedule
+### 5. Real-Time Watcher (No Scheduling Required)
+Instead of running `cleaner.py` manually or on a schedule, you can use `watcher.py` to monitor your Downloads folder in real time. The moment a new file finishes downloading, it is automatically sorted.
+
+**Install the dependency:**
+```bash
+pip install watchdog
+```
+
+**Start the watcher:**
+```bash
+python watcher.py
+```
+
+The watcher will print a confirmation and stay running in the background:
+```
+👁️  [LIVE] Watching for new files in: /Users/you/Downloads
+Press Ctrl+C to stop.
+
+📁 Moved: report.pdf ➡️ /PDFs/2026/June
+```
+
+It inherits all features from `cleaner.py` — dry run mode, date-based subfolders, and duplicate detection. Press `Ctrl+C` to stop.
+
+### 6. Run Automatically on a Schedule
 
 **Windows (Task Scheduler)**
 
