@@ -21,6 +21,7 @@ A production-ready, cross-platform Python automation system that monitors and cl
 - **Date-Based Subfolders:** Files are automatically sorted into `Year/Month` subfolders within each category (e.g., `/Images/2026/June/`), keeping things tidy long-term.
 - **Automatic Duplicate Cleanup:** Uses MD5 hashing to detect files with identical content. Exact duplicates are deleted instead of being moved, saving disk space.
 - **Real-Time Watcher:** Uses the `watchdog` library to monitor your folder in real time. The instant a new file lands, it is sorted automatically — no schedules or manual runs needed.
+- **Desktop Notifications:** Sends native OS notifications (via `plyer`) whenever files are sorted or duplicates are removed, so you always know what's happening.
 - **Reversible:** Accidentally ran it? Run the companion `undo_cleaner.py` script to seamlessly return all files to the main folder and delete the generated subfolders.
 
 ---
@@ -143,9 +144,19 @@ Press Ctrl+C to stop.
 📁 Moved: report.pdf ➡️ /PDFs/2026/June
 ```
 
-It inherits all features from `cleaner.py` — dry run mode, date-based subfolders, and duplicate detection. Press `Ctrl+C` to stop.
+It inherits all features from `cleaner.py` — dry run mode, date-based subfolders, duplicate detection, and desktop notifications. Press `Ctrl+C` to stop.
 
-### 6. Run Automatically on a Schedule
+### 6. Desktop Notifications
+Both `cleaner.py` and `watcher.py` send native OS notifications using `plyer`. You'll see a toast popup whenever files are organized or duplicates are removed.
+
+**Install the dependency:**
+```bash
+pip install plyer
+```
+
+Notifications are automatically skipped in **Dry Run** mode and if `plyer` encounters any issues on your platform.
+
+### 7. Run Automatically on a Schedule
 
 **Windows (Task Scheduler)**
 

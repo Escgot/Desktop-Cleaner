@@ -3,6 +3,7 @@ import shutil
 import hashlib
 from pathlib import Path
 from datetime import datetime
+from plyer import notification
 
 # Set to True to preview changes without moving files, False to actually move them
 DRY_RUN = True
@@ -26,6 +27,17 @@ def file_hash(file_path):
         for chunk in iter(lambda: f.read(4096), b""):
             hasher.update(chunk)
     return hasher.hexdigest()
+
+def send_notification(title, message):
+    """Send a native OS desktop notification."""
+    try:
+        notification.notify(
+            title=title,
+            message=message,
+            timeout=5
+        )
+    except Exception:
+        pass  # Silently skip if notifications are unavailable
 
 def clean_downloads():
     if not DOWNLOADS_DIR.exists():
@@ -111,7 +123,11 @@ def clean_downloads():
                     print(f"📁 Moved unknown file: {item.name} ➡️ /Others")
                 files_moved += 1
 
-    print(f"\n✨ Clean-up complete! Organized {files_moved} files, removed {dupes_removed} duplicates.")
+    summary = f"Organized {files_moved} files, removed {dupes_removed} duplicates."
+    print(f"\n✨ Clean-up complete! {summary}")
+
+    if not DRY_RUN and (files_moved > 0 or dupes_removed > 0):
+        send_notification("Downloads Cleaned! 🧹", summary)
 
 if __name__ == "__main__":
     clean_downloads()

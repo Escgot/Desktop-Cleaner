@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from cleaner import DOWNLOADS_DIR, FILE_CATEGORIES, DRY_RUN, file_hash
+from cleaner import DOWNLOADS_DIR, FILE_CATEGORIES, DRY_RUN, file_hash, send_notification
 
 from datetime import datetime
 import shutil
@@ -79,6 +79,7 @@ class DownloadHandler(FileSystemEventHandler):
                         else:
                             item.unlink()
                             print(f"🗑️  Deleted duplicate: {item.name} (matches {existing.name})")
+                            send_notification("Duplicate Removed 🗑️", f"{item.name} was an exact copy of {existing.name}")
                         return
 
                 destination = target_dir / item.name
@@ -90,6 +91,7 @@ class DownloadHandler(FileSystemEventHandler):
                 else:
                     shutil.move(str(item), str(destination))
                     print(f"📁 Moved: {item.name} ➡️ /{category}/{year_month}")
+                    send_notification("File Sorted 📁", f"{item.name} → /{category}/{year_month}")
                 moved = True
                 break
 
@@ -109,6 +111,7 @@ class DownloadHandler(FileSystemEventHandler):
                 else:
                     shutil.move(str(item), str(destination))
                     print(f"📁 Moved: {item.name} ➡️ /Others/{year_month}")
+                    send_notification("File Sorted 📁", f"{item.name} → /Others/{year_month}")
 
 
 def main():
